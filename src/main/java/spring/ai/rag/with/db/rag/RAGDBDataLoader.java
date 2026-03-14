@@ -2,6 +2,8 @@ package spring.ai.rag.with.db.rag;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.transformer.splitter.TextSplitter;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,8 +32,16 @@ public class RAGDBDataLoader {
                         Map.of("id", product.getId())
                 ))
                 .toList();
-        System.out.println("Documents to be added to vector store: " + documents);
-       vectorStore.add(documents);
+
+        TextSplitter textSplitter = TokenTextSplitter
+                .builder()
+                .withChunkSize(20)
+                .withMaxNumChunks(200)
+                .build(); // create tokenTextSplitter with chunk size of 20 and max number of chunks as 200
+
+        List<Document> splitDocs = textSplitter.split(documents);
+
+       vectorStore.add(splitDocs);
     }
 
 }
